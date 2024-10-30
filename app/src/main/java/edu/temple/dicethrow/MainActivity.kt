@@ -2,10 +2,12 @@ package edu.temple.dicethrow
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.FragmentContainerView
 
 
 /*
@@ -20,19 +22,23 @@ The Activity layout files for both Portrait and Landscape are already provided
 */
 
 class MainActivity : AppCompatActivity(), ButtonFragment.ButtonInterface {
+    lateinit var buttonFragment: ButtonFragment
+    lateinit var dieFragment: DieFragment
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        buttonFragment = ButtonFragment()
+        dieFragment = DieFragment()
+
+        supportFragmentManager.beginTransaction().add(R.id.container1, buttonFragment).commit()
+
         if (resources.configuration.orientation== Configuration.ORIENTATION_LANDSCAPE){
             supportFragmentManager.beginTransaction().apply {
-                add(R.id.container1, ButtonFragment())
-                add(R.id.container2, DieFragment())
+                add(R.id.container2, dieFragment)
                 commit()
             }
-        }
-        else{
-            supportFragmentManager.beginTransaction().add(R.id.container1, ButtonFragment())
         }
     }
 
@@ -40,8 +46,18 @@ class MainActivity : AppCompatActivity(), ButtonFragment.ButtonInterface {
         */
     // Remember to place Fragment transactions on BackStack so then can be reversed
     override fun buttonClicked() {
-
+        if (resources.configuration.orientation== Configuration.ORIENTATION_LANDSCAPE) {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.container1, dieFragment)
+                addToBackStack("switchedFragments")
+                commit()
+            }
+        }
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        supportFragmentManager.popBackStack()
+    }
 
 }
